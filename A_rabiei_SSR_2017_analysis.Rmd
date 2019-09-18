@@ -1,0 +1,111 @@
+---
+title: "Microsatelite Genotyping of <i>Ascochyta rabiei</i> Isolates"
+author: "Ido Bar"
+date: "28 February 2019"
+output: 
+    html_notebook:
+      css: style/style.css
+      toc: true
+      toc_float: true
+      toc_depth: 3
+      highlight: pygments
+      number_sections: false
+      code_folding: hide
+bibliography: style/Fungal_genomes.bib
+csl: style/springer-basic-improved-author-date-with-italic-et-al-period.csl
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(list(echo = TRUE, eval=FALSE, message=FALSE))
+# options(width = 180)
+cran_packages <- c("tidyverse", "knitr", "pander", "captioner", "DT", 
+                   "gtools","poppr",  "tidyverse", "bindr", "ape", "DataExplorer", 
+                        "readxl")
+pacman::p_load(char=cran_packages, repos="https://cran.rstudio.com/")
+# Connect to Zotero to access references
+# biblio <- ReadBib("data/Fungal_genomes.bib") # , "bibtex", "RefManageR"
+# Font Format
+custom_font="consolas"
+fontFmt = function(x,font="consolas"){
+  #outputFormat = knitr::opts_knit$get("rmarkdown.pandoc.to")
+  #if (outputFormat == 'html')
+  formatted_text <- sprintf("<font face='%s'>%s</font>",font,x)
+  return(formatted_text)
+  #else
+  #  x
+}
+```
+
+
+
+```{r captions, include=FALSE, eval=TRUE}
+figs <- captioner(prefix="Figure")
+tbls <- captioner(prefix="Table")
+tbls(name="samples","Ascochyta rabiei isolates used for SSR genotyping.")
+
+isolate_table <- readxl::read_excel("./sample_info/A_rabiei_isolate_list_for_wgs.xlsx", sheet = "Sequenced")
+sequencing_table <- readxl::read_excel("./sample_info/A_rabiei_isolate_list_for_wgs.xlsx", sheet = "submission_info") 
+sequencing_dict <- set_names(sequencing_table$Isolate, sequencing_table$Submission_id)
+samples_table <- isolate_table %>% arrange(desc(Pathogenicity), desc(Collection_Year), Site)
+
+#readxl::read_excel("../P_rabiei_isolate_list_for_wgs.xlsx", sheet = "Sequenced") %>%
+  # filter(!is.na(Sequenced))  %>% inner_join(isolate_table) %>%
+  # mutate(Collection_Year=as.character(isolate_table$Year[match(Isolate, isolate_table$isolate_name)]),
+  #        Collection_Year=if_else(!is.na(Collection_Year), Collection_Year, 
+  #                         paste0("20", sub("[A-Z]*(\\d{2}).+", "\\1", Isolate)))) %>%
+  # dplyr::select(Isolate, Site, State, Collection_Year, Rating, Pathogenicity,Haplotype) %>%
+   # %>% write_csv("isolate_list_WGS_2018.csv")
+# xlsx::write.xlsx(as.data.frame(samples_table))
+tfam_table <- samples_table  %>% dplyr::select(State, Isolate) %>%
+  mutate(V3=0, V4=0, V5=0, V6=-9)
+#figs(name="WtFreq1","Weight frequency of Ruffe captured in 1992.")
+
+```
+
+# Experimental Design
+In 2017, DNA was extracted from 21 strains of _Ascochyta rabiei_ and sent for Whole-Genome-Sequencing (WGS) on an Illumina HiSeq2500, producing 100 bp short paired-end reads (Macrogen, Korea; detailed sequencing report can be found at `Macrogen_report_1702KHP-0164.pdf` file).  
+In the following year (2018), DNA from 20 additional *A. rabiei* isolates was extracted and sent for WGS, first to AgriBio, Centre for AgriBioscience, Agriculture Victoria Research ([Dimpy](mailto:sukhjiwan.kaur\@ecodev.vic.gov.au) and [Brittney](mailto:brittney.caruana\@ecodev.vic.gov.au)) on a HiSeq2500(?), producing 150 bp short paired-end reads. Since the library preparation and sequencing was substantially delayed, 18 DNA samples, mostly overlapping with the 20 samples sent for AgriVic, were sent for sequencing at the Australian Genome Research Facility (AGRF, Melbourne) on 4 lanes of a NextSeq flowcell, producing 150 bp paried-end reads (run name CAGRF19461).  
+Details of the sequenced isolates is provided in (`r tbls(name="samples",display="cite")`).
+
+```{r eval=TRUE} 
+datatable(as.data.frame(samples_table), caption=tbls("samples")) %>% # , 
+          # options = list(dom = 'tf', pageLength = 40)) %>%
+  formatStyle('Pathogenicity',
+  backgroundColor = styleInterval(0:3, c('limegreen','gold', 'orange', 'orangered', 'firebrick'))
+)# pander , justify="left"
+```
+
+# Aims
+* Analyse the _A. rabiei_ population structure and diversity across sampling regions and years
+* Identify strain-unique haplotypes to develop detection methods
+* Associate aggressiveness with specific haplotype
+
+# Analysis Pipeline
+## General overview:
+1. Data pre-processing:
+    a. Quality check
+    b. Adaptor trimming
+    c. Post-trim quality check
+2. Mapping reads to a reference genome (keep unmapped)
+3. Reads deduplication
+4. Variant calling and filtration
+5. Variant annotation
+6. Variant-Pathogenicity association
+7. Produce variant statistics and assessment 
+
+## Methods
+
+
+## Appendix 1. Useful resources
+
+
+## General information
+This document was last updated at `r Sys.time()` using R Markdown (built with `r R.version.string`). Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. It is especially powerful at authoring reproducible documents and reports which include the results of executed code. For more details on using R Markdown see <http://rmarkdown.rstudio.com> and [Rmarkdown cheatsheet](https://www.rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf).
+
+***
+## Bibliography
+
+<!-- ```{r results='asis', eval=TRUE} -->
+<!-- PrintBibliography(biblio) -->
+<!-- ``` -->
+

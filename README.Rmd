@@ -1,0 +1,102 @@
+---
+title: "Microsatelite Genotyping of <i>Ascochyta rabiei</i> Isolates"
+author: "Ido Bar"
+date: "28 February 2019"
+always_allow_html: yes
+output: 
+    md_document:
+#      css: "style/style.css"
+      toc: true
+      toc_depth: 3
+#      highlight: pygments
+#      number_sections: false
+    # html_document:
+    #   css: "style/style.css"
+    #   toc: true
+    #   toc_float: true
+    #   toc_depth: 3
+    #   highlight: pygments
+    #   number_sections: false
+    #   code_folding: hide
+    #   keep_md: true
+bibliography: style/Fungal_genomes.bib
+csl: style/springer-basic-improved-author-date-with-italic-et-al-period.csl
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(list(echo = TRUE, eval=FALSE, message=FALSE))
+# options(width = 180)
+cran_packages <- c("tidyverse", "knitr", "pander", "captioner", "DT", "circlize", "htmltab")
+pacman::p_load(char=cran_packages, repos="https://cran.rstudio.com/")
+# Connect to Zotero to access references
+# biblio <- ReadBib("data/Fungal_genomes.bib") # , "bibtex", "RefManageR"
+# Font Format
+custom_font="consolas"
+fontFmt = function(x,font="consolas"){
+  #outputFormat = knitr::opts_knit$get("rmarkdown.pandoc.to")
+  #if (outputFormat == 'html')
+  formatted_text <- sprintf("<font face='%s'>%s</font>",font,x)
+  return(formatted_text)
+  #else
+  #  x
+}
+```
+
+
+
+```{r captions, include=FALSE, eval=TRUE}
+figs <- captioner(prefix="Figure")
+tbls <- captioner(prefix="Table")
+tbls(name="samples","Ascochyta rabiei isolates used for DNA sequencing.")
+isolate_table <- readxl::read_excel("./sample_info/A_rabiei_isolate_list_for_wgs.xlsx", sheet = "Sequenced")
+
+samples_table <- isolate_table %>% select(-one_of(c("ICC3996", "Genesis090", "HatTrick", "Rating", "Haplotype"))) %>% 
+  arrange(desc(Pathogenicity), desc(Collection_Year), Site)
+```
+
+# Whole Genome Sequencing of <i>Ascochyta rabiei</i> Isolates
+## Experimental Design
+In 2017, DNA was extracted from 21 strains of _Ascochyta rabiei_ and sent for Whole-Genome-Sequencing (WGS) on an Illumina HiSeq2500, producing 100 bp short paired-end reads (Macrogen, Korea).  
+In the following year (2018), DNA from 20 additional *A. rabiei* isolates was extracted and sent for WGS, first to AgriBio, Centre for AgriBioscience, Agriculture Victoria Research and on a HiSeq2500, producing 150 bp short paired-end reads. Since the library preparation and sequencing was substantially delayed, 18 DNA samples, mostly overlapping with the 20 samples sent for AgriVic, were sent for sequencing at the Australian Genome Research Facility (AGRF, Melbourne) on 4 lanes of a NextSeq flowcell, producing 150 bp paried-end reads (run name CAGRF19461).  
+Details of the sequenced isolates is provided in (`r tbls(name="samples",display="cite")`).
+
+
+```{r eval=TRUE, echo=FALSE} 
+pander(as.data.frame(samples_table), caption=tbls("samples"), justify="left") 
+```
+
+# Aims
+* Analyse _A. rabiei_ population structure and diversity across sampling regions and years
+* Identify strain-unique haplotypes to develop detection methods
+* Associate aggressiveness with specific haplotype
+
+## Analysis Pipeline
+### General overview:
+1. Data pre-processing:
+    a. Quality check
+    b. Adaptor trimming
+    c. Post-trim quality check
+2. Mapping reads to a reference genome (keep unmapped)
+3. Reads deduplication
+4. Variant calling and filtration
+5. Variant annotation
+6. Variant-Pathogenicity association
+7. Produce variant statistics and assessment 
+
+### Methods
+
+
+## Appendices
+### Appendix 1. Useful resources
+
+
+### Appendix 2. General information
+This document was last updated at `r Sys.time()` using R Markdown (built with `r R.version.string`). Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. It is especially powerful at authoring reproducible documents and reports which include the results of executed code.. For more details on using R Markdown see <http://rmarkdown.rstudio.com> and [Rmarkdown cheatsheet](https://www.rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf).
+
+***
+## Bibliography
+
+<!-- ```{r results='asis', eval=TRUE} -->
+<!-- PrintBibliography(biblio) -->
+<!-- ``` -->
+
